@@ -3,8 +3,7 @@ load("encoding/csv.star", "csv")
 load("encoding/json.star", "json")
 load("render.star", "render")
 load("schema.star", "schema")
-
-
+load("encoding/base64.star", "base64")
 
 
 def main(config):
@@ -14,31 +13,47 @@ def main(config):
         return render.Root(
             child = render.Text("Could not fetch heating data")
         )
-    
-    
-    print(sheet['room'])
-    #print(sheet.values())
-   
-    return render.Root(
-        child = render.Box(
-            render.Column(
-                cross_align="center",
-                main_align = "center",
-                children = [
-                    render.Text(
-                        content = "Heating Data",
-                        font = "tb-8"
-                    ),
 
-                    render.Text(
-                        content = sheet[ROOM[0]],
-                        font = "6x13",
-                    ),
-                ],
-            ),
+    rooms=sheet[0][1:]
+    temps=sheet[1][1:]
+    print(rooms)
+    print(temps)
+    print("testing")
+    print(sheet[2][1:])
 
-        ),
+    col1 = []
+    col2 = []
+    for rw in rooms:
+        col1.append(render.Marquee(width=50, child=render.Text(content = rw, font="tom-thumb")))
+    
+
+    for rw in temps:
+        col2.append(render.Text(content=rw, font="tom-thumb"))
+    
+    columns = []    
+    columns.append(
+        render.Column(
+            main_align = "space_between",
+            cross_align = "left",
+            children = col1 
+        )
     )
+    columns.append(
+        render.Column(
+            main_align = "space_between",
+            cross_align = "right",
+            children = col2
+        )
+    )
+
+
+    return render.Root(
+        child = render.Row(
+            children = columns
+        )
+    )
+        
+    
 
 
 
@@ -61,15 +76,14 @@ CURRENT = 'currentemp'
 TARGET = 'targettemp'
 
 def process_heating(heating_csv):
-    heats = {}
-    for row in csv.read_all(heating_csv):
-        heat = {
-            ROOM: row[0],
-            CURRENT: row[1],
-            TARGET: row[2],
-            }
-        heats[heat[ROOM]] = heat 
-    return heats
+    rooms=[]
+    temps=[]
+    roomtemps=[]
+    for csvrow in csv.read_all(heating_csv):
+        rooms.append(csvrow[0])
+        temps.append(csvrow[1])
+        roomtemps.append(csvrow)
+    return rooms,temps, roomtemps
 
 
     
